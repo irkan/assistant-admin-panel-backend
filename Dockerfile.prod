@@ -1,6 +1,9 @@
 # Production Dockerfile for Prisma Backend
 FROM node:18-alpine AS builder
 
+# Install OpenSSL and other required dependencies for Prisma
+RUN apk add --no-cache openssl
+
 # Set working directory
 WORKDIR /app
 
@@ -16,6 +19,9 @@ RUN npx prisma generate
 
 # Production stage
 FROM node:18-alpine AS production
+
+# Install OpenSSL for runtime
+RUN apk add --no-cache openssl
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs
