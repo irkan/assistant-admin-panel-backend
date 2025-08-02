@@ -7,7 +7,7 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
+    "updated_at" TIMESTAMP(3),
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -20,7 +20,7 @@ CREATE TABLE "organizations" (
     "parent_id" INTEGER,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
+    "updated_at" TIMESTAMP(3),
 
     CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
 );
@@ -41,7 +41,7 @@ CREATE TABLE "agents" (
     "name" TEXT NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
+    "updated_at" TIMESTAMP(3),
 
     CONSTRAINT "agents_pkey" PRIMARY KEY ("id")
 );
@@ -53,7 +53,7 @@ CREATE TABLE "agent_details" (
     "system_prompt" TEXT,
     "interaction_mode" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
+    "updated_at" TIMESTAMP(3),
 
     CONSTRAINT "agent_details_pkey" PRIMARY KEY ("agent_id")
 );

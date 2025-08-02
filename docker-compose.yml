@@ -14,32 +14,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - admin-panel-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d admin_panel"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: admin-panel-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@adminpanel.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    ports:
-      - "8080:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - admin-panel-network
-    depends_on:
-      postgres:
-        condition: service_healthy
 
 volumes:
   postgres_data:
@@ -48,13 +28,3 @@ volumes:
       type: none
       o: bind
       device: ./data/postgres
-  pgadmin_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/pgadmin
-
-networks:
-  admin-panel-network:
-    driver: bridge 
