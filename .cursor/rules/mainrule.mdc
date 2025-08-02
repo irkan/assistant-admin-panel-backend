@@ -1,0 +1,206 @@
+---
+alwaysApply: false
+---
+Cursor AI Rules for Node.js Admin Panel Webapp Project
+These rules outline the best practices and guidelines for using Cursor AI to develop a Node.js-based admin panel webapp with a REST API backend, utilizing PostgreSQL for data storage and a migration tool for schema and data management.
+Project Overview
+
+Backend: Node.js (REST APIs)
+Database: PostgreSQL
+Migration Tool: Preferred tool for schema and data migrations (e.g., Sequelize, Knex.js, or Prisma)
+Goal: Build a scalable, maintainable, and secure admin panel webapp following modern best practices.
+
+General Guidelines
+
+Code Quality:npm 
+
+Write clean, modular, and maintainable code adhering to JavaScript/Node.js best practices.
+Use consistent code formatting with tools like Prettier (latest version).
+Follow ESLint rules (use Airbnb or Standard style guide, latest version) for linting.
+Add concise, meaningful comments to explain complex logic, API endpoints, and key functions.
+
+
+Versioning:
+
+Use the latest stable version of Node.js (e.g., Node.js 20.x or later as of August 2025).
+Ensure all dependencies (e.g., Express, Sequelize/Knex/Prisma, etc.) use the latest stable versions compatible with the Node.js version.
+Regularly update dependencies to patch security vulnerabilities using tools like npm audit.
+
+
+Error Handling:
+
+Implement centralized error handling middleware in Express for consistent error responses.
+Use appropriate HTTP status codes (e.g., 200, 201, 400, 401, 404, 500) for API responses.
+Log errors using a logging library (e.g., Winston or Pino, latest versions) for debugging and monitoring.
+
+
+Security:
+
+Use environment variables for sensitive data (e.g., database credentials, API keys) with dotenv (latest version).
+Implement input validation using libraries like Joi or express-validator (latest versions).
+Use Helmet (latest version) to secure Express apps by setting HTTP headers.
+Implement authentication (e.g., JWT with jsonwebtoken) and authorization for admin panel access.
+Sanitize database inputs to prevent SQL injection (handled by ORM/ODM).
+
+
+
+Backend Development
+
+Framework:
+
+Use Express.js (latest stable version) as the primary framework for building REST APIs.
+Structure the project using MVC (Model-View-Controller) or a similar pattern for modularity.
+
+
+API Design:
+
+Follow RESTful principles: use appropriate HTTP methods (GET, POST, PUT, DELETE, etc.).
+Version APIs (e.g., /api/v1/resource) to support future updates.
+Return consistent JSON response structures:{
+  "status": "success|error",
+  "data": { /* response data */ },
+  "message": "Optional message for errors or success"
+}
+
+
+Use query parameters for filtering, sorting, and pagination (e.g., /api/v1/users?limit=10&offset=0).
+Document APIs using tools like Swagger/OpenAPI (via swagger-ui-express, latest version).
+
+
+Project Structure:
+
+Organize the codebase into folders like:/src
+  /controllers
+  /models
+  /routes
+  /middleware
+  /config
+  /utils
+  /tests
+
+
+Keep configuration files (e.g., database, environment) in /config.
+
+
+
+Database and Migrations
+
+Database:
+
+Use PostgreSQL (latest stable version, e.g., 16.x or later) for data storage.
+Use an ORM/ODM for database interactions:
+Preferred: Prisma (latest version) for type-safe queries and migrations.
+Alternatives: Sequelize or Knex.js (latest versions) if Prisma is not suitable.
+
+
+Define clear database schemas with appropriate data types, constraints, and indexes.
+
+
+Migrations:
+
+Use the migration tool provided by the chosen ORM (e.g., Prisma Migrate, Sequelize CLI, or Knex migrations).
+Create migrations for schema changes and seed data for initial setup.
+Ensure migrations are idempotent and reversible where possible.
+Example migration structure (for Prisma):-- Create users table
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+
+Performance:
+
+Use database indexes for frequently queried fields (e.g., email, IDs).
+Implement connection pooling with the ORM or pg (node-postgres, latest version).
+Optimize queries to avoid N+1 problems and unnecessary data fetching.
+
+
+
+Testing
+
+Unit Tests:
+
+Use Jest (latest version) with Supertest for testing API endpoints.
+Write unit tests for controllers, services, and utilities.
+Aim for at least 80% test coverage.
+
+
+Integration Tests:
+
+Test API endpoints with real or mocked database connections.
+Use a separate test database to avoid polluting production data.
+
+
+Test Setup:
+
+Configure a test environment with NODE_ENV=test.
+Use tools like cross-env (latest version) for cross-platform environment variable management.
+
+
+
+Development Workflow
+
+Version Control:
+
+Use Git for version control with a clear branching strategy (e.g., Gitflow or trunk-based development).
+Write meaningful commit messages (e.g., feat: add user authentication endpoint).
+
+
+Code Reviews:
+
+Use Cursor AI to assist with code suggestions, but manually review all AI-generated code for accuracy and security.
+Ensure AI-generated code adheres to project style guides and best practices.
+
+
+CI/CD:
+
+Set up a CI/CD pipeline using tools like GitHub Actions or GitLab CI.
+Run linting, tests, and security checks on every push/pull request.
+
+
+
+Additional Tools and Libraries
+
+Monitoring: Use New Relic or Prometheus (latest versions) for performance monitoring.
+Rate Limiting: Implement rate limiting with express-rate-limit (latest version) to prevent abuse.
+CORS: Configure CORS properly using cors (latest version) for secure frontend-backend communication.
+Documentation: Use JSDoc for code documentation and Swagger for API documentation.
+
+Cursor AI-Specific Rules
+
+Code Generation:
+
+Use Cursor AI to generate boilerplate code for routes, controllers, and models, but always review and customize outputs.
+Prompt Cursor AI with specific instructions (e.g., "Generate a REST API endpoint for user creation with input validation using Joi").
+Ensure AI-generated code follows the project’s style guide and includes comments.
+
+
+Refactoring:
+
+Use Cursor AI to suggest refactoring improvements (e.g., splitting large functions, optimizing queries).
+Verify that refactored code maintains functionality and passes tests.
+
+
+Debugging:
+
+Leverage Cursor AI to identify potential bugs or performance issues in code.
+Cross-check AI suggestions with manual debugging using tools like Node.js debugger or VS Code.
+
+
+
+Example Code Snippet
+Below is an example of a REST API endpoint for user creation with input validation and error handling:
+
+
+// userController.jsconst Joi = require('joi');const { User } = require('../models');const asyncHandler = require('../utils/asyncHandler');
+// Validation schema for user creationconst createUserSchema = Joi.object({  email: Joi.string().email().required(),  password: Joi.string().min(8).required(),  role: Joi.string().valid('admin', 'user').required(),});
+// Create a new userexports.createUser = asyncHandler(async (req, res) => {  // Validate input  const { error } = createUserSchema.validate(req.body);  if (error) {    return res.status(400).json({      status: 'error',      message: error.details[0].message,    });  }
+  const { email, password, role } = req.body;
+  // Check if user already exists  const existingUser = await User.findOne({ where: { email } });  if (existingUser) {    return res.status(409).json({      status: 'error',      message: 'User with this email already exists',    });  }
+  // Create user  const user = await User.create({ email, password, role });
+  return res.status(201).json({    status: 'success',    data: { id: user.id, email: user.email, role: user.role },    message: 'User created successfully',  });});
