@@ -20,17 +20,6 @@ if [ ! -f ".env.production" ]; then
     exit 1
 fi
 
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo -e "${RED}❌ Error: Docker is not installed${NC}"
-    exit 1
-fi
-
-# Check if Docker Compose is installed
-if ! command -v docker compose &> /dev/null; then
-    echo -e "${RED}❌ Error: Docker Compose is not installed${NC}"
-    exit 1
-fi
 
 # Stop existing containers
 echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"
