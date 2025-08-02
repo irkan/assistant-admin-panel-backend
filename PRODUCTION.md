@@ -39,7 +39,7 @@ If you prefer to do it manually:
 ```bash
 # Create .env.production with your values
 cat > .env.production << EOF
-POSTGRES_PASSWORD=your-secure-password
+DATABASE_URL="postgresql://username:password@your-database-host:5432/admin_panel"
 JWT_SECRET=your-super-secure-jwt-secret
 EOF
 ```
@@ -73,8 +73,8 @@ git pull
 # View logs
 docker-compose -f docker-compose.prod.yml --env-file .env.production logs -f backend
 
-# Database backup
-docker exec admin-panel-postgres pg_dump -U postgres admin_panel > backup.sql
+# Database backup (if using external database)
+pg_dump "postgresql://username:password@your-database-host:5432/admin_panel" > backup.sql
 ```
 
 ## Access Points

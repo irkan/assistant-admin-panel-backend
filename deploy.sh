@@ -35,7 +35,7 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d
 
 # Wait for services to be ready
 echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
-sleep 10
+sleep 5
 
 # Run database migrations
 echo -e "${YELLOW}🗄️  Running database migrations...${NC}"
