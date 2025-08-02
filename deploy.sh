@@ -27,22 +27,22 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v docker compose &> /dev/null; then
     echo -e "${RED}❌ Error: Docker Compose is not installed${NC}"
     exit 1
 fi
 
 # Stop existing containers
 echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"
-docker-compose -f docker-compose.prod.yml --env-file .env.production down
+docker compose -f docker-compose.prod.yml --env-file .env.production down
 
 # Build the application
 echo -e "${YELLOW}🔨 Building application...${NC}"
-docker-compose -f docker-compose.prod.yml --env-file .env.production build
+docker compose -f docker-compose.prod.yml --env-file .env.production build
 
 # Start the application
 echo -e "${YELLOW}🚀 Starting application...${NC}"
-docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d
 
 # Wait for services to be ready
 echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
@@ -50,11 +50,11 @@ sleep 10
 
 # Run database migrations
 echo -e "${YELLOW}🗄️  Running database migrations...${NC}"
-docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T backend npm run db:migrate:deploy
+docker compose -f docker-compose.prod.yml --env-file .env.production exec -T backend npm run db:migrate:deploy
 
 # Check if services are running
 echo -e "${YELLOW}📊 Checking service status...${NC}"
-docker-compose -f docker-compose.prod.yml --env-file .env.production ps
+docker compose -f docker-compose.prod.yml --env-file .env.production ps
 
 # Test health endpoint
 echo -e "${YELLOW}🏥 Testing health endpoint...${NC}"
@@ -65,7 +65,7 @@ if curl -f http://localhost:3000/health > /dev/null 2>&1; then
 else
     echo -e "${RED}❌ Health check failed${NC}"
     echo -e "${YELLOW}📋 Checking logs...${NC}"
-    docker-compose -f docker-compose.prod.yml --env-file .env.production logs backend
+    docker compose -f docker-compose.prod.yml --env-file .env.production logs backend
     exit 1
 fi
 
