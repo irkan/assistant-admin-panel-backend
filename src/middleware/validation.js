@@ -359,6 +359,16 @@ const validateAgentData = (req, res, next) => {
         message: 'Interaction mode must be a string'
       });
     }
+
+    if (details.interactionMode !== undefined && 
+        details.interactionMode !== 'agent_speak_first' && 
+        details.interactionMode !== 'user_speak_first') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid interaction mode',
+        message: 'Interaction mode must be either "agent_speak_first" or "user_speak_first"'
+      });
+    }
   }
   
   req.validatedAgentData = {
