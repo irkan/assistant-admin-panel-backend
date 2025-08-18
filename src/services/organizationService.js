@@ -22,7 +22,23 @@ const getOrganizationById = async (organizationId) => {
  * @returns {Object} Organizations data with pagination info
  */
 const getAllOrganizations = async (filters, pagination) => {
-  const { organizations, totalCount } = await organizationRepository.findAll(filters, pagination);
+  let organizations, totalCount;
+  
+  // If userId is provided, get user-specific organizations
+  if (filters.userId) {
+    organizations = await organizationRepository.findByUserId(filters.userId);
+    totalCount = organizations.length;
+    
+    // Apply pagination to user-specific results
+    const start = pagination.offset;
+    const end = start + pagination.limit;
+    organizations = organizations.slice(start, end);
+  } else {
+    // Get all organizations with regular filtering
+    const result = await organizationRepository.findAll(filters, pagination);
+    organizations = result.organizations;
+    totalCount = result.totalCount;
+  }
   
   const formattedOrganizations = organizations.map(formatOrganizationResponse);
   
@@ -38,12 +54,69 @@ const getAllOrganizations = async (filters, pagination) => {
 };
 
 /**
+ * Generate unique short name from organization name
+ * @param {string} name - Organization name
+ * @returns {string} Generated unique short name
+ */
+const generateUniqueShortName = async (name) => {
+  // Remove special characters and split by words
+  const words = name
+    .replace(/[^a-zA-Z\s]/g, '')
+    .split(/\s+/)
+    .filter(word => word.length > 0);
+  
+  // Generate base short name from first letters
+  let shortName = words.map(word => word.charAt(0).toUpperCase()).join('');
+  
+  // If only one word, take first 2-3 letters
+  if (words.length === 1 && words[0].length > 1) {
+    shortName = words[0].substring(0, Math.min(3, words[0].length)).toUpperCase();
+  }
+  
+  // Check if this short name exists
+  let finalShortName = shortName;
+  let counter = 0;
+  
+  while (await organizationRepository.findByShortName(finalShortName)) {
+    counter++;
+    if (words.length > 1) {
+      // For multi-word names, add letters from words
+      if (counter <= words.length) {
+        const wordIndex = counter - 1;
+        if (words[wordIndex] && words[wordIndex].length > 1) {
+          finalShortName = shortName + words[wordIndex].charAt(1).toUpperCase();
+        } else {
+          finalShortName = shortName + counter;
+        }
+      } else {
+        finalShortName = shortName + counter;
+      }
+    } else {
+      // For single word, extend or add number
+      if (words[0].length > shortName.length + counter - 1) {
+        finalShortName = words[0].substring(0, shortName.length + counter).toUpperCase();
+      } else {
+        finalShortName = shortName + counter;
+      }
+    }
+  }
+  
+  return finalShortName;
+};
+
+/**
  * Create a new organization
  * @param {Object} organizationData - Organization data
+ * @param {number} userId - User ID to link to the organization
  * @returns {Object} Created organization
  */
-const createOrganization = async (organizationData) => {
-  const organization = await organizationRepository.create(organizationData);
+const createOrganization = async (organizationData, userId) => {
+  // Generate unique short name if not provided
+  if (!organizationData.shortName) {
+    organizationData.shortName = await generateUniqueShortName(organizationData.name);
+  }
+  
+  const organization = await organizationRepository.create(organizationData, userId);
   return formatOrganizationResponse(organization);
 };
 

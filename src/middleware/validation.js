@@ -256,6 +256,11 @@ const validateFilters = (req, res, next) => {
     filters.active = active === 'true';
   }
 
+  // Add current user ID to filters if user is authenticated
+  if (req.user && req.user.id) {
+    filters.userId = req.user.id;
+  }
+
   req.validatedFilters = filters;
   next();
 };
@@ -267,7 +272,7 @@ const validateFilters = (req, res, next) => {
  * @param {Function} next - Express next function
  */
 const validateLoginData = (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, googleId, provider } = req.body;
   
   if (!email || typeof email !== 'string' || !email.includes('@')) {
     return res.status(400).json({
@@ -277,17 +282,95 @@ const validateLoginData = (req, res, next) => {
     });
   }
   
-  if (!password || typeof password !== 'string' || password.length === 0) {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid password',
-      message: 'Password is required'
-    });
+  // For Google login
+  if (provider === 'google') {
+    if (!googleId || typeof googleId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid Google ID',
+        message: 'Google ID is required for Google login'
+      });
+    }
+  } else {
+    // For regular email/password login
+    if (!password || typeof password !== 'string' || password.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid password',
+        message: 'Password is required'
+      });
+    }
   }
   
   req.validatedLoginData = {
     email: email.trim().toLowerCase(),
-    password: password
+    password: password || undefined,
+    googleId: googleId || undefined,
+    provider: provider || 'email'
+  };
+  next();
+};
+
+/**
+ * Validate register data
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ */
+const validateRegisterData = (req, res, next) => {
+  const { email, password, name, surname, googleId, provider } = req.body;
+  
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid email',
+      message: 'Email is required and must be a valid email address'
+    });
+  }
+  
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid name',
+      message: 'Name is required and must be a non-empty string'
+    });
+  }
+  
+  if (!surname || typeof surname !== 'string' || surname.trim().length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid surname',
+      message: 'Surname is required and must be a non-empty string'
+    });
+  }
+  
+  // For Google registration
+  if (provider === 'google') {
+    if (!googleId || typeof googleId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid Google ID',
+        message: 'Google ID is required for Google registration'
+      });
+    }
+  } else {
+    // For regular email registration
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid password',
+        message: 'Password is required and must be at least 6 characters long'
+      });
+    }
+  }
+  
+  req.validatedRegisterData = {
+    email: email.trim().toLowerCase(),
+    name: name.trim(),
+    surname: surname.trim(),
+    password: password || undefined,
+    googleId: googleId || undefined,
+    provider: provider || 'email'
   };
   next();
 };
@@ -389,5 +472,6 @@ module.exports = {
   validateUserData,
   validateOrganizationData,
   validateLoginData,
+  validateRegisterData,
   validateAgentData
 }; 

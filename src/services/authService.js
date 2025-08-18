@@ -4,11 +4,11 @@ const userRepository = require('../repositories/userRepository');
 
 /**
  * Authenticate user login
- * @param {string} email - User email
- * @param {string} password - User password
+ * @param {Object} loginData - Login data (email, password, googleId, provider)
  * @returns {Object} Login result with user data and token
  */
-const login = async (email, password) => {
+const login = async (loginData) => {
+  const { email, password, googleId, provider } = loginData;
   try {
     // Find user by email
     const user = await userRepository.findByEmail(email);
@@ -28,14 +28,32 @@ const login = async (email, password) => {
       };
     }
     
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    
-    if (!isPasswordValid) {
-      return {
-        success: false,
-        message: 'Invalid email or password'
-      };
+    // Verify authentication method
+    if (provider === 'google') {
+      // For Google login, verify googleId matches
+      if (!user.googleId || user.googleId !== googleId) {
+        return {
+          success: false,
+          message: 'Google authentication failed'
+        };
+      }
+    } else {
+      // For regular login, verify password
+      if (!password) {
+        return {
+          success: false,
+          message: 'Password is required'
+        };
+      }
+      
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      
+      if (!isPasswordValid) {
+        return {
+          success: false,
+          message: 'Invalid email or password'
+        };
+      }
     }
     
     // Generate JWT token
@@ -55,6 +73,75 @@ const login = async (email, password) => {
     return {
       success: false,
       message: 'Login failed. Please try again.'
+    };
+  }
+};
+
+/**
+ * Register a new user
+ * @param {Object} userData - User registration data
+ * @returns {Object} Registration result with user data and token
+ */
+const register = async (userData) => {
+  try {
+    const { email, password, name, surname, googleId, provider } = userData;
+    
+    // Check if user already exists
+    const existingUser = await userRepository.findByEmail(email);
+    if (existingUser) {
+      return {
+        success: false,
+        message: 'User with this email already exists'
+      };
+    }
+    
+    // Prepare user data for creation
+    const newUserData = {
+      email,
+      name,
+      surname,
+      active: true
+    };
+    
+    // Handle different registration types
+    if (provider === 'google' && googleId) {
+      // Google registration - no password needed
+      newUserData.googleId = googleId;
+      newUserData.provider = 'google';
+      // Generate a random password for Google users (won't be used for login)
+      newUserData.password = await bcrypt.hash(Math.random().toString(36), 10);
+    } else {
+      // Regular email/password registration
+      if (!password) {
+        return {
+          success: false,
+          message: 'Password is required for email registration'
+        };
+      }
+      newUserData.password = await bcrypt.hash(password, 10);
+      newUserData.provider = 'email';
+    }
+    
+    // Create user
+    const user = await userRepository.create(newUserData);
+    
+    // Generate JWT token
+    const token = generateToken(user);
+    
+    // Format user data (exclude password)
+    const userResponse = formatUserForResponse(user);
+    
+    return {
+      success: true,
+      user: userResponse,
+      token
+    };
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    return {
+      success: false,
+      message: 'Registration failed. Please try again.'
     };
   }
 };
@@ -96,5 +183,6 @@ const formatUserForResponse = (user) => {
 
 module.exports = {
   login,
+  register,
   generateToken
-}; 
+};

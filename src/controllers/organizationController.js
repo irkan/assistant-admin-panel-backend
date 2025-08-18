@@ -48,7 +48,9 @@ const getAllOrganizations = async (req, res) => {
  */
 const createOrganization = async (req, res) => {
   const organizationData = req.validatedOrganizationData;
-  const organization = await organizationService.createOrganization(organizationData);
+  const userId = req.user.id; // Get current user ID from auth middleware
+  
+  const organization = await organizationService.createOrganization(organizationData, userId);
 
   res.status(201).json({
     success: true,
