@@ -1,22 +1,22 @@
 /**
- * Validate agent ID parameter
+ * Validate assistant ID parameter
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
  */
-const validateAgentId = (req, res, next) => {
+const validateAssistantId = (req, res, next) => {
   const { id } = req.params;
-  const agentId = parseInt(id);
+  const assistantId = parseInt(id);
 
-  if (isNaN(agentId)) {
+  if (isNaN(assistantId)) {
     return res.status(400).json({
       success: false,
-      error: 'Invalid agent ID',
-      message: 'Agent ID must be a valid number'
+      error: 'Invalid assistant ID',
+      message: 'Assistant ID must be a valid number'
     });
   }
 
-  req.validatedAgentId = agentId;
+  req.validatedAssistantId = assistantId;
   next();
 };
 
@@ -376,19 +376,19 @@ const validateRegisterData = (req, res, next) => {
 };
 
 /**
- * Validate agent data for create/update operations
+ * Validate assistant data for create/update operations
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
  */
-const validateAgentData = (req, res, next) => {
-  const { name, organizationId, active, details } = req.body;
+const validateAssistantData = (req, res, next) => {
+  const { name, organizationId, active, status, details, tools } = req.body;
   
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
     return res.status(400).json({
       success: false,
-      error: 'Invalid agent name',
-      message: 'Agent name is required and must be a non-empty string'
+      error: 'Invalid assistant name',
+      message: 'Assistant name is required and must be a non-empty string'
     });
   }
   
@@ -406,6 +406,17 @@ const validateAgentData = (req, res, next) => {
       error: 'Invalid active status',
       message: 'Active must be a boolean value'
     });
+  }
+
+  // Validate status if provided
+  if (status !== undefined && status !== null) {
+    if (typeof status !== 'string' || (status !== 'draft' && status !== 'published')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status',
+        message: 'Status must be either "draft" or "published"'
+      });
+    }
   }
 
   // Validate details if provided
@@ -444,27 +455,103 @@ const validateAgentData = (req, res, next) => {
     }
 
     if (details.interactionMode !== undefined && 
-        details.interactionMode !== 'agent_speak_first' && 
+        details.interactionMode !== 'assistant_speak_first' && 
         details.interactionMode !== 'user_speak_first') {
       return res.status(400).json({
         success: false,
         error: 'Invalid interaction mode',
-        message: 'Interaction mode must be either "agent_speak_first" or "user_speak_first"'
+        message: 'Interaction mode must be either "assistant_speak_first" or "user_speak_first"'
+      });
+    }
+
+    // Validate userPrompt
+    if (details.userPrompt !== undefined && typeof details.userPrompt !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid user prompt',
+        message: 'User prompt must be a string'
+      });
+    }
+
+    // Validate provider
+    if (details.provider !== undefined && typeof details.provider !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid provider',
+        message: 'Provider must be a string'
+      });
+    }
+
+    // Validate model
+    if (details.model !== undefined && typeof details.model !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid model',
+        message: 'Model must be a string'
+      });
+    }
+
+    // Validate selectedVoice
+    if (details.selectedVoice !== undefined && typeof details.selectedVoice !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid voice',
+        message: 'Selected voice must be a string'
+      });
+    }
+
+    // Validate temperature
+    if (details.temperature !== undefined && (typeof details.temperature !== 'number' || details.temperature < 0 || details.temperature > 2)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid temperature',
+        message: 'Temperature must be a number between 0 and 2'
+      });
+    }
+
+    // Validate silenceTimeout
+    if (details.silenceTimeout !== undefined && (typeof details.silenceTimeout !== 'number' || details.silenceTimeout < 1)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid silence timeout',
+        message: 'Silence timeout must be a positive number'
+      });
+    }
+
+    // Validate maximumDuration
+    if (details.maximumDuration !== undefined && (typeof details.maximumDuration !== 'number' || details.maximumDuration < 1)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid maximum duration',
+        message: 'Maximum duration must be a positive number'
+      });
+    }
+  }
+
+  // Validate tools if provided
+  if (tools !== undefined && tools !== null) {
+    if (!Array.isArray(tools)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid tools',
+        message: 'Tools must be an array'
       });
     }
   }
   
-  req.validatedAgentData = {
+  req.validatedAssistantData = {
     name: name.trim(),
     organizationId: organizationId,
     active: active !== undefined ? active : true,
-    details: details || null
+    status: status || 'draft', // Default to draft if not provided
+    details: details || null,
+    tools: tools || []
   };
   next();
 };
 
 module.exports = {
-  validateAgentId,
+  validateAssistantId,
   validateUserId,
   validateOrganizationId,
   validatePagination,
@@ -473,5 +560,5 @@ module.exports = {
   validateOrganizationData,
   validateLoginData,
   validateRegisterData,
-  validateAgentData
+  validateAssistantData
 }; 

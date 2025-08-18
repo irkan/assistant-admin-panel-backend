@@ -32,15 +32,19 @@ app.use(express.urlencoded({ extended: true }));
 
 // Import routes
 const authRoutes = require('./routes/auth');
-const agentsRoutes = require('./routes/agents');
+const assistantsRoutes = require('./routes/assistants');
 const organizationsRoutes = require('./routes/organizations');
 const usersRoutes = require('./routes/users');
+const toolsRoutes = require('./routes/tools');
+const apiKeysRoutes = require('./routes/api-keys');
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/agents', agentsRoutes);
+app.use('/api/assistants', assistantsRoutes);
 app.use('/api/organizations', organizationsRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/tools', toolsRoutes);
+app.use('/api/api-keys', apiKeysRoutes);
 
 // Health endpoint
 app.get('/health', async (req, res) => {
@@ -80,9 +84,11 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/health',
       auth: '/api/auth',
-      agents: '/api/agents',
+      assistants: '/api/assistants',
       organizations: '/api/organizations',
-      users: '/api/users'
+      users: '/api/users',
+      tools: '/api/tools',
+      apiKeys: '/api/api-keys'
     }
   });
 });

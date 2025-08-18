@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userRepository = require('../repositories/userRepository');
+const organizationRepository = require('../repositories/organizationRepository');
 
 /**
  * Authenticate user login
@@ -62,10 +63,16 @@ const login = async (loginData) => {
     // Format user data (exclude password)
     const userData = formatUserForResponse(user);
     
+    // Check if user has organizations
+    const userOrganizations = await organizationRepository.findByUserId(user.id);
+    const hasOrganizations = userOrganizations && userOrganizations.length > 0;
+    
     return {
       success: true,
       user: userData,
-      token
+      token,
+      hasOrganizations,
+      redirectTo: hasOrganizations ? "/" : "/dashboard"
     };
     
   } catch (error) {
@@ -131,10 +138,16 @@ const register = async (userData) => {
     // Format user data (exclude password)
     const userResponse = formatUserForResponse(user);
     
+    // Check if user has organizations (for new registrations, usually none)
+    const userOrganizations = await organizationRepository.findByUserId(user.id);
+    const hasOrganizations = userOrganizations && userOrganizations.length > 0;
+    
     return {
       success: true,
       user: userResponse,
-      token
+      token,
+      hasOrganizations,
+      redirectTo: hasOrganizations ? "/" : "/dashboard"
     };
     
   } catch (error) {

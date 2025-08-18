@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 /**
  * Find organization by ID with related data
  * @param {number} id - Organization ID
- * @returns {Object|null} Organization with parent, children, and agents
+ * @returns {Object|null} Organization with parent, children, and assistants
  */
 const findById = async (id) => {
   return await prisma.organization.findUnique({
@@ -25,7 +25,7 @@ const findById = async (id) => {
           shortName: true
         }
       },
-      agents: {
+      assistants: {
         select: {
           id: true,
           name: true,
@@ -73,7 +73,7 @@ const findAll = async (filters, pagination) => {
             shortName: true
           }
         },
-        agents: {
+        assistants: {
           select: {
             id: true,
             name: true,
@@ -118,7 +118,7 @@ const create = async (organizationData, userId) => {
             shortName: true
           }
         },
-        agents: {
+        assistants: {
           select: {
             id: true,
             name: true,
@@ -167,7 +167,7 @@ const update = async (id, organizationData) => {
           shortName: true
         }
       },
-      agents: {
+      assistants: {
         select: {
           id: true,
           name: true,
@@ -249,7 +249,7 @@ const findByUserId = async (userId) => {
           shortName: true
         }
       },
-      agents: {
+      assistants: {
         select: {
           id: true,
           name: true,

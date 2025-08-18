@@ -23,7 +23,9 @@ const login = async (req, res) => {
     message: 'Login successful',
     data: {
       user: result.user,
-      token: result.token
+      token: result.token,
+      hasOrganizations: result.hasOrganizations,
+      redirectTo: result.redirectTo
     }
   });
 };
@@ -51,7 +53,9 @@ const register = async (req, res) => {
     message: 'Registration successful',
     data: {
       user: result.user,
-      token: result.token
+      token: result.token,
+      hasOrganizations: result.hasOrganizations,
+      redirectTo: result.redirectTo
     }
   });
 };

@@ -3,7 +3,7 @@ const organizationRepository = require('../repositories/organizationRepository')
 /**
  * Get organization details by ID with related data
  * @param {number} organizationId - The organization ID
- * @returns {Object|null} Organization data with parent/children and agents
+ * @returns {Object|null} Organization data with parent/children and assistants
  */
 const getOrganizationById = async (organizationId) => {
   const organization = await organizationRepository.findById(organizationId);
@@ -169,10 +169,10 @@ const formatOrganizationResponse = (organization) => {
       name: child.name,
       shortName: child.shortName
     })) : [],
-    agents: organization.agents ? organization.agents.map(agent => ({
-      id: agent.id,
-      name: agent.name,
-      active: agent.active
+    assistants: organization.assistants ? organization.assistants.map(assistant => ({
+      id: assistant.id,
+      name: assistant.name,
+      active: assistant.active
     })) : []
   };
 };
