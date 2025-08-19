@@ -16,6 +16,7 @@ app.use(helmet({
 
 app.use(cors({
   origin: [
+    'http://46.62.135.5:3003',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://accounts.google.com',
