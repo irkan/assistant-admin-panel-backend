@@ -44,8 +44,8 @@ model Organization {
   // Many-to-many relationship with users
   users UserOrganization[]
 
-  // One-to-many relationship with assistants
-  assistants Assistant[]
+  // One-to-many relationship with agents
+  agents Agent[]
 
   @@map("organizations")
 }
@@ -63,55 +63,32 @@ model UserOrganization {
   @@map("user_organizations")
 }
 
-model Assistant {
+model Agent {
   id             Int       @id @default(autoincrement())
   organizationId Int       @map("organization_id")
   name           String
   active         Boolean   @default(true)
-  status         String    @default("draft") // draft, published
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime? @map("updated_at")
 
   // Relationships
-  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  details      AssistantDetails?
-  tools        AssistantTool[]
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  details      AgentDetails?
 
   @@unique([organizationId, name])
-  @@map("assistants")
+  @@map("agents")
 }
 
-model AssistantDetails {
-  assistantId     Int       @id @map("assistant_id")
+model AgentDetails {
+  agentId         Int       @id @map("agent_id")
   firstMessage    String?   @map("first_message")
-  userPrompt      String?   @map("user_prompt")
   systemPrompt    String?   @map("system_prompt")
   interactionMode String?   @map("interaction_mode")
-  provider        String?   @default("azure-openai")
-  model          String?   @default("gpt-4o-2024-11-20")
-  selectedVoice   String?   @map("selected_voice") @default("zephyr")
-  temperature     Float?    @default(0.7)
-  silenceTimeout  Int?      @map("silence_timeout") @default(30)
-  maximumDuration Int?      @map("maximum_duration") @default(600)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime? @map("updated_at")
 
   // Relationships
-  assistant Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
-  @@map("assistant_details")
-}
-
-model AssistantTool {
-  id          Int      @id @default(autoincrement())
-  assistantId Int      @map("assistant_id")
-  toolId      String   @map("tool_id")
-  toolName    String   @map("tool_name")
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  // Relationships
-  assistant Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
-
-  @@unique([assistantId, toolId])
-  @@map("assistant_tools")
+  @@map("agent_details")
 } 
