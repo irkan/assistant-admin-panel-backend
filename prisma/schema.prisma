@@ -44,8 +44,8 @@ model Organization {
   // Many-to-many relationship with users
   users UserOrganization[]
 
-  // One-to-many relationship with agents
-  agents Agent[]
+  // One-to-many relationship with assistants
+  assistants Assistant[]
 
   @@map("organizations")
 }
@@ -63,32 +63,56 @@ model UserOrganization {
   @@map("user_organizations")
 }
 
-model Agent {
+model Assistant {
   id             Int       @id @default(autoincrement())
+  uuid           String    @unique @default(uuid()) // New UUID field
   organizationId Int       @map("organization_id")
   name           String
   active         Boolean   @default(true)
+  status         String    @default("draft") // draft, published
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime? @map("updated_at")
 
   // Relationships
-  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  details      AgentDetails?
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  details      AssistantDetails?
+  tools        AssistantTool[] // Added tools relation
 
   @@unique([organizationId, name])
-  @@map("agents")
+  @@map("assistants")
 }
 
-model AgentDetails {
-  agentId         Int       @id @map("agent_id")
+model AssistantDetails {
+  assistantId     Int       @id @map("assistant_id")
   firstMessage    String?   @map("first_message")
+  userPrompt      String?   @map("user_prompt") // Added missing field
   systemPrompt    String?   @map("system_prompt")
   interactionMode String?   @map("interaction_mode")
+  provider        String?   @default("google") @map("provider") // Added missing field
+  model           String?   @default("gemini-2.0-flash-001") @map("model") // Added missing field
+  selectedVoice   String?   @map("selected_voice") @default("zephyr") // Added missing field
+  temperature     Float?    @default(0.7) @map("temperature") // Added missing field
+  silenceTimeout  Int?      @map("silence_timeout") @default(30) // Added missing field
+  maximumDuration Int?      @map("maximum_duration") @default(600) // Added missing field
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime? @map("updated_at")
 
   // Relationships
-  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  assistant Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
 
-  @@map("agent_details")
+  @@map("assistant_details")
+}
+
+model AssistantTool {
+  id          Int      @id @default(autoincrement())
+  assistantId Int      @map("assistant_id")
+  toolId      String   @map("tool_id")
+  toolName    String   @map("tool_name")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  assistant Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+
+  @@unique([assistantId, toolId])
+  @@map("assistant_tools")
 } 

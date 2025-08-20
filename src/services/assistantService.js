@@ -80,8 +80,9 @@ const deleteAssistant = async (assistantId) => {
 const formatAssistantResponse = (assistant) => {
   return {
     id: assistant.id,
+    uuid: assistant.uuid, // Add UUID field
     name: assistant.name,
-    organizationId: assistant.organizationId, // Add this field
+    organizationId: assistant.organizationId,
     active: assistant.active,
     status: assistant.status,
     createdAt: assistant.createdAt,

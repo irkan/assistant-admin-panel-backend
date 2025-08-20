@@ -35,6 +35,13 @@ const findAll = async (filters, pagination) => {
   // Build where clause
   const where = {};
   
+  // Always filter by active unless explicitly specified
+  if (filters.active !== undefined) {
+    where.active = filters.active;
+  } else {
+    where.active = true; // Default to only show active assistants
+  }
+  
   // If user is authenticated, filter by their organizations
   if (filters.userId) {
     where.organization = {
@@ -48,10 +55,6 @@ const findAll = async (filters, pagination) => {
   
   if (filters.organizationId) {
     where.organizationId = filters.organizationId;
-  }
-  
-  if (filters.active !== undefined) {
-    where.active = filters.active;
   }
 
   // Execute queries in parallel
@@ -207,13 +210,14 @@ const update = async (id, assistantData) => {
 };
 
 /**
- * Delete an assistant
+ * Soft delete an assistant (set active = false)
  * @param {number} id - Assistant ID
- * @returns {Object} Deleted assistant
+ * @returns {Object} Soft deleted assistant
  */
 const deleteById = async (id) => {
-  return await prisma.assistant.delete({
+  return await prisma.assistant.update({
     where: { id },
+    data: { active: false },
     include: {
       organization: {
         select: {
@@ -223,7 +227,8 @@ const deleteById = async (id) => {
           active: true
         }
       },
-      details: true
+      details: true,
+      tools: true
     }
   });
 };
