@@ -1,5 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
+const { importRealVoices } = require('../scripts/importRealVoices');
+const { updateFeaturedVoices } = require('../scripts/updateFeaturedVoices');
 
 const prisma = new PrismaClient();
 
@@ -190,12 +192,24 @@ async function main() {
 
   console.log('⚙️  Created assistant details');
 
+  // Import voices from voice.json
+  console.log('🎵 Importing voices from voice.json...');
+  try {
+    await importRealVoices();
+    await updateFeaturedVoices();
+    console.log('✅ Voices imported successfully!');
+  } catch (error) {
+    console.error('⚠️  Failed to import voices, continuing with seed:', error.message);
+  }
+
   console.log('✅ Database seeded successfully!');
   console.log('\n📊 Sample Data Summary:');
   console.log(`- ${await prisma.organization.count()} organizations`);
   console.log(`- ${await prisma.user.count()} users`);
   console.log(`- ${await prisma.assistant.count()} assistants`);
   console.log(`- ${await prisma.assistantDetails.count()} assistant configurations`);
+  console.log(`- ${await prisma.voice.count()} voices`);
+  console.log(`- ${await prisma.voice.count({ where: { isFeatured: true } })} featured voices`);
 }
 
 main()

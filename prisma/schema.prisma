@@ -115,4 +115,26 @@ model AssistantTool {
 
   @@unique([assistantId, toolId])
   @@map("assistant_tools")
+}
+
+model Voice {
+  id          String    @id // UUID from voice.json
+  provider    String    // "11labs", "playht", "neets", etc.
+  providerId  String    @map("provider_id") // Original provider ID
+  slug        String    @unique
+  name        String
+  gender      String    // "male", "female"
+  accent      String?   // "british", "australian", etc.
+  previewUrl  String    @map("preview_url") // MP3 URL
+  description String?
+  isPublic    Boolean   @default(true) @map("is_public")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  isFeatured  Boolean   @default(false) @map("is_featured") // For featured voices
+  imageUrl    String?   @map("image_url") // Avatar image URL
+  bestFor     String?   @map("best_for") // "Conversational, Healthcare", etc.
+  orgId       String?   @map("org_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+
+  @@map("voices")
 } 

@@ -38,7 +38,8 @@
     "supertest": "^6.3.3"
   },
   "prisma": {
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js",
+    "import-voices": "node scripts/importRealVoices.js"
   },
   "engines": {
     "node": ">=16.0.0"

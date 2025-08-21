@@ -37,6 +37,7 @@ const organizationsRoutes = require('./routes/organizations');
 const usersRoutes = require('./routes/users');
 const toolsRoutes = require('./routes/tools');
 const apiKeysRoutes = require('./routes/api-keys');
+const voicesRoutes = require('./routes/voices');
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -45,6 +46,7 @@ app.use('/api/organizations', organizationsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/tools', toolsRoutes);
 app.use('/api/api-keys', apiKeysRoutes);
+app.use('/api/voices', voicesRoutes);
 
 // Health endpoint
 app.get('/health', async (req, res) => {
