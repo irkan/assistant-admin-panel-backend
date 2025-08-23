@@ -92,24 +92,43 @@ const updateAssistant = async (req, res) => {
  * @param {Object} res - Express response object
  */
 const publishAssistant = async (req, res) => {
+  console.log('📢 Publish request received for assistant:', req.params.id);
+  console.log('📢 Request body:', JSON.stringify(req.body, null, 2));
+  
   const assistantId = req.validatedAssistantId;
   const assistantData = req.validatedAssistantData;
   
-  const result = await assistantService.publishAssistant(assistantId, assistantData);
+  console.log('📢 Validated assistant ID:', assistantId);
+  console.log('📢 Validated assistant data:', JSON.stringify(assistantData, null, 2));
   
-  if (!result.success) {
-    return res.status(404).json({
+  try {
+    const result = await assistantService.publishAssistant(assistantId, assistantData);
+    
+    console.log('📢 Service result:', result);
+    
+    if (!result.success) {
+      console.log('❌ Publish failed:', result.message);
+      return res.status(400).json({
+        success: false,
+        error: 'Publication failed',
+        message: result.message
+      });
+    }
+
+    console.log('✅ Assistant published successfully');
+    res.json({
+      success: true,
+      message: 'Assistant published successfully',
+      data: result.assistant
+    });
+  } catch (error) {
+    console.error('💥 Publish error:', error);
+    res.status(500).json({
       success: false,
-      error: 'Publication failed',
-      message: result.message
+      error: 'Internal server error',
+      message: error.message
     });
   }
-
-  res.json({
-    success: true,
-    message: 'Assistant published successfully',
-    data: result.assistant
-  });
 };
 
 /**

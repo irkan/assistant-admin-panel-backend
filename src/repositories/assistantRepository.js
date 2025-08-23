@@ -254,6 +254,11 @@ const exists = async (id) => {
 const publish = async (id, assistantData) => {
   const { details, tools, ...assistantFields } = assistantData;
   
+  console.log('🗃️ Repository: Publishing assistant', id);
+  console.log('🗃️ Repository: Details:', details);
+  console.log('🗃️ Repository: Tools:', tools);
+  console.log('🗃️ Repository: Assistant fields:', assistantFields);
+  
   return await prisma.$transaction(async (tx) => {
     // Update assistant basic info and set status to published
     const updatedAssistant = await tx.assistant.update({
@@ -299,7 +304,7 @@ const publish = async (id, assistantData) => {
     }
 
     // Update tools - first delete existing ones, then create new ones
-    if (tools) {
+    if (tools && Array.isArray(tools)) {
       // Delete existing tools
       await tx.assistantTool.deleteMany({
         where: { assistantId: id }
@@ -308,10 +313,10 @@ const publish = async (id, assistantData) => {
       // Create new tools if any
       if (tools.length > 0) {
         await tx.assistantTool.createMany({
-          data: tools.map(tool => ({
+          data: tools.map(toolId => ({
             assistantId: id,
-            toolId: tool.id || tool.toolId || tool,
-            toolName: tool.name || tool.toolName || tool
+            toolId: String(toolId), // Convert to string to match schema
+            toolName: `tool_${toolId}` // Temporary name since we don't have the actual tool name
           }))
         });
       }

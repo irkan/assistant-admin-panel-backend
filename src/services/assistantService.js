@@ -112,18 +112,24 @@ const formatAssistantResponse = (assistant) => {
  */
 const publishAssistant = async (assistantId, assistantData) => {
   try {
+    console.log('🔄 Service: Publishing assistant', assistantId, 'with data:', JSON.stringify(assistantData, null, 2));
+    
     // Update assistant status to published
     const publishedAssistant = await assistantRepository.publish(assistantId, assistantData);
     
     if (!publishedAssistant) {
+      console.log('❌ Service: Assistant not found');
       return { success: false, message: 'Assistant not found' };
     }
 
+    console.log('✅ Service: Assistant published successfully');
     return {
       success: true,
       assistant: formatAssistantResponse(publishedAssistant)
     };
   } catch (error) {
+    console.error('💥 Service: Publish error:', error);
+    console.error('💥 Service: Stack trace:', error.stack);
     return {
       success: false,
       message: 'Failed to publish assistant',
