@@ -98,7 +98,8 @@ const formatAssistantResponse = (assistant) => {
       selectedVoice: assistant.details.selectedVoice,
       temperature: assistant.details.temperature,
       silenceTimeout: assistant.details.silenceTimeout,
-      maximumDuration: assistant.details.maximumDuration
+      maximumDuration: assistant.details.maximumDuration,
+      avatarName: assistant.details.avatarName
     } : null,
     tools: assistant.tools || []
   };

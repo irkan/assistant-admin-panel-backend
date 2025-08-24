@@ -80,7 +80,8 @@ const findAll = async (filters, pagination) => {
             selectedVoice: true,
             temperature: true,
             silenceTimeout: true,
-            maximumDuration: true
+            maximumDuration: true,
+            avatarName: true
           }
         },
         tools: true
@@ -285,6 +286,7 @@ const publish = async (id, assistantData) => {
           temperature: details.temperature,
           silenceTimeout: details.silenceTimeout,
           maximumDuration: details.maximumDuration,
+          avatarName: details.avatarName,
           updatedAt: new Date()
         },
         create: {
@@ -298,7 +300,8 @@ const publish = async (id, assistantData) => {
           selectedVoice: details.selectedVoice,
           temperature: details.temperature,
           silenceTimeout: details.silenceTimeout,
-          maximumDuration: details.maximumDuration
+          maximumDuration: details.maximumDuration,
+          avatarName: details.avatarName
         }
       });
     }

@@ -94,6 +94,7 @@ model AssistantDetails {
   temperature     Float?    @default(0.7) @map("temperature") // Added missing field
   silenceTimeout  Int?      @map("silence_timeout") @default(30) // Added missing field
   maximumDuration Int?      @map("maximum_duration") @default(600) // Added missing field
+  avatarName      String?   @map("avatar_name") @default("Ayla") // Avatar selection field
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime? @map("updated_at")
 
