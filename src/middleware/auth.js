@@ -42,12 +42,15 @@ const authenticateToken = async (req, res, next) => {
       });
     }
     
-    // Attach user to request
+    // Attach user to request with organization info
     req.user = {
       id: user.id,
       email: user.email,
       name: user.name,
-      surname: user.surname
+      surname: user.surname,
+      // Get the first organization the user belongs to
+      organizationId: user.organizations?.[0]?.organization?.id || null,
+      organizations: user.organizations?.map(uo => uo.organization) || []
     };
     
     next();
@@ -104,7 +107,10 @@ const optionalAuth = async (req, res, next) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        surname: user.surname
+        surname: user.surname,
+        // Get the first organization the user belongs to
+        organizationId: user.organizations?.[0]?.organization?.id || null,
+        organizations: user.organizations?.map(uo => uo.organization) || []
       };
     }
     

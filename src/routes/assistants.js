@@ -7,22 +7,39 @@ const {
   validateAssistantData 
 } = require('../middleware/validation');
 const { authenticateToken } = require('../middleware/auth');
+const { authenticateApiKey, checkAssistantAccess, checkOrganizationAccess } = require('../middleware/apiKeyAuth');
 
 const router = express.Router();
 
 /**
+ * Combined authentication middleware - supports both JWT and API key
+ */
+const combinedAuth = (req, res, next) => {
+  // Check if API key is provided
+  const apiKey = req.headers['x-api-key'] || (req.headers['authorization']?.startsWith('ak_') ? req.headers['authorization'].replace('Bearer ', '') : null);
+  
+  if (apiKey) {
+    // Use API key authentication
+    return authenticateApiKey(req, res, next);
+  } else {
+    // Use JWT authentication
+    return authenticateToken(req, res, next);
+  }
+};
+
+/**
  * @route GET /api/assistants/:id
  * @desc Get assistant details by ID
- * @access Public
+ * @access Public (with API key) / Private (with JWT)
  */
-router.get('/:id', validateAssistantId, assistantController.getAssistantById);
+router.get('/:id', combinedAuth, validateAssistantId, checkAssistantAccess, assistantController.getAssistantById);
 
 /**
  * @route GET /api/assistants
  * @desc Get all assistants with optional filtering
  * @access Private
  */
-router.get('/', authenticateToken, validatePagination, validateFilters, assistantController.getAllAssistants);
+router.get('/', combinedAuth, validatePagination, validateFilters, checkOrganizationAccess, assistantController.getAllAssistants);
 
 /**
  * @route POST /api/assistants
