@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const apiKeyRepository = require('../repositories/apiKeyRepository');
+const encryptionService = require('./encryptionService');
 
 /**
  * Generate a new API key
@@ -48,6 +49,9 @@ const createApiKey = async (data) => {
     // Generate API key
     const { key, hash, prefix } = generateApiKey();
     
+    // Store the full key encrypted for future visibility requests
+    const encryptedKey = encryptionService.encrypt(key);
+    
     // Calculate expiry date
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expiresInDays);
@@ -58,6 +62,7 @@ const createApiKey = async (data) => {
       name: name.trim(),
       keyHash: hash,
       keyPrefix: prefix,
+      encryptedKey, // Store encrypted version
       allowedAssistants,
       expiresAt,
       active: true
@@ -67,7 +72,8 @@ const createApiKey = async (data) => {
     return {
       ...apiKey,
       rawKey: key, // Include raw key in response
-      keyHash: undefined // Don't expose hash
+      keyHash: undefined, // Don't expose hash
+      encryptedKey: undefined // Don't expose encrypted version
     };
     
   } catch (error) {
@@ -244,6 +250,46 @@ const getApiKeyById = async (id) => {
   }
 };
 
+/**
+ * Get full API key by ID (decrypted)
+ * @param {number} id - API key ID
+ * @returns {Object|null} API key data with full key
+ */
+const getFullApiKeyById = async (id) => {
+  try {
+    const apiKey = await apiKeyRepository.findById(id);
+    
+    if (!apiKey) {
+      return null;
+    }
+    
+    // Decrypt the full key if it exists
+    let fullKey = null;
+    if (apiKey.encryptedKey) {
+      try {
+        fullKey = encryptionService.decrypt(apiKey.encryptedKey);
+      } catch (error) {
+        console.error('Failed to decrypt API key:', error);
+        // If decryption fails, we'll return without the full key
+      }
+    }
+    
+    // Remove sensitive data
+    return {
+      ...apiKey,
+      keyHash: undefined,
+      encryptedKey: undefined,
+      fullKey: fullKey, // Only include if successfully decrypted
+      maskedKey: `${apiKey.keyPrefix}${'*'.repeat(56)}`,
+      isExpired: new Date() > apiKey.expiresAt
+    };
+    
+  } catch (error) {
+    console.error('Error getting full API key by ID:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   generateApiKey,
   hashApiKey,
@@ -253,5 +299,6 @@ module.exports = {
   getApiKeysByOrganization,
   updateApiKey,
   deleteApiKey,
-  getApiKeyById
+  getApiKeyById,
+  getFullApiKeyById
 };

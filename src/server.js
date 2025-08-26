@@ -39,6 +39,7 @@ const usersRoutes = require('./routes/users');
 const toolsRoutes = require('./routes/tools');
 const apiKeysRoutes = require('./routes/api-keys');
 const voicesRoutes = require('./routes/voices');
+const assistantApiRoutes = require('./routes/assistantApi');
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -48,6 +49,9 @@ app.use('/api/users', usersRoutes);
 app.use('/api/tools', toolsRoutes);
 app.use('/api/api-keys', apiKeysRoutes);
 app.use('/api/voices', voicesRoutes);
+
+// API v1 routes for external API key access
+app.use('/api/v1', assistantApiRoutes);
 
 // Health endpoint
 app.get('/health', async (req, res) => {
@@ -91,7 +95,11 @@ app.get('/', (req, res) => {
       organizations: '/api/organizations',
       users: '/api/users',
       tools: '/api/tools',
-      apiKeys: '/api/api-keys'
+      apiKeys: '/api/api-keys',
+      // API v1 for external access
+      'v1-assistants': '/api/v1/assistants',
+      'v1-assistant-by-uuid': '/api/v1/assistants/{uuid}',
+      'v1-auth-info': '/api/v1/auth/info'
     }
   });
 });

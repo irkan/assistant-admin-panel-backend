@@ -149,6 +149,7 @@ model ApiKey {
   name              String
   keyHash           String    @unique @map("key_hash")
   keyPrefix         String    @map("key_prefix")
+  encryptedKey      String?   @map("encrypted_key") // Encrypted full key for visibility
   active            Boolean   @default(true)
   allowedAssistants Int[]     @map("allowed_assistants")
   expiresAt         DateTime  @map("expires_at")

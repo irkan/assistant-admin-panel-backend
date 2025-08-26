@@ -62,6 +62,71 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 /**
+ * @route GET /api/api-keys/:id/full
+ * @desc Get full API key (decrypted) by ID
+ * @access Private
+ */
+router.get('/:id/full', authenticateToken, async (req, res) => {
+  try {
+    const keyId = parseInt(req.params.id);
+    
+    if (isNaN(keyId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bad Request',
+        message: 'Invalid API key ID'
+      });
+    }
+    
+    const apiKey = await apiKeyService.getFullApiKeyById(keyId);
+    
+    if (!apiKey) {
+      return res.status(404).json({
+        success: false,
+        error: 'API key not found',
+        message: `API key with ID ${keyId} does not exist`
+      });
+    }
+    
+    // Check if user has access to this API key's organization
+    const userOrganizationId = req.user.organizationId;
+    
+    if (!userOrganizationId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bad Request',
+        message: 'User is not associated with any organization'
+      });
+    }
+    
+    if (apiKey.organizationId !== userOrganizationId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Forbidden',
+        message: 'Access denied'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: {
+        id: apiKey.id,
+        fullKey: apiKey.fullKey,
+        name: apiKey.name
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching full API key:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: 'Failed to fetch full API key'
+    });
+  }
+});
+
+/**
  * @route GET /api/api-keys/:id
  * @desc Get API key details by ID
  * @access Private
