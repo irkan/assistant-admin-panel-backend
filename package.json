@@ -21,6 +21,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@google/genai": "^1.16.0",
     "@prisma/client": "^5.7.1",
     "axios": "^1.11.0",
     "bcrypt": "^5.1.1",
@@ -30,6 +31,7 @@
     "express-validator": "^7.2.1",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mime": "^4.0.7",
     "morgan": "^1.10.0"
   },
   "devDependencies": {

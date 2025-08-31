@@ -80,6 +80,7 @@ model Assistant {
   organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   details      AssistantDetails?
   tools        AssistantTool[] // Added tools relation
+  avatarImages AvatarImage[] // Avatar background images
 
   @@unique([organizationId, name])
   @@map("assistants")
@@ -141,6 +142,23 @@ model Voice {
   updatedAt   DateTime? @map("updated_at")
 
   @@map("voices")
+}
+
+model AvatarImage {
+  id           Int       @id @default(autoincrement())
+  assistantId  Int       @map("assistant_id")
+  imageData    String    @map("image_data") // Base64 encoded image
+  mimeType     String    @map("mime_type") // image/png, image/jpeg
+  prompt       String    // Original prompt used for generation
+  description  String?   // Generated description
+  isActive     Boolean   @default(false) @map("is_active") // Whether this is the active avatar image
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime? @map("updated_at")
+
+  // Relationships
+  assistant Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+
+  @@map("avatar_images")
 }
 
 model ApiKey {
