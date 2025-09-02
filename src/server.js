@@ -2,9 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const { WebSocketServer } = require('ws');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const prisma = require('./lib/prisma');
+const WebSocketController = require('./controllers/websocketController');
 const app = express();
 const PORT = process.env.PORT || 3003;
 
@@ -101,7 +105,9 @@ app.get('/', (req, res) => {
       // API v1 for external access
       'v1-assistants': '/api/v1/assistants',
       'v1-assistant-by-uuid': '/api/v1/assistants/{uuid}',
-      'v1-auth-info': '/api/v1/auth/info'
+      'v1-auth-info': '/api/v1/auth/info',
+      // WebSocket for voice communication (same port)
+      'voice-websocket': `ws://localhost:${PORT}?assistantUuid={uuid}&apiKey={key}`
     }
   });
 });
@@ -122,10 +128,55 @@ app.use(errorHandler);
 
 // Start server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Health check available at: http://localhost:${PORT}/health`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+
+  // Initialize WebSocket server on the same port as HTTP server
+  const wss = new WebSocketServer({ server });
+  const websocketController = new WebSocketController();
+
+  console.log(`🎤 WebSocket server (voice) integrated on port ${PORT}`);
+  console.log(`🔗 Voice WebSocket: ws://localhost:${PORT}?assistantUuid={uuid}&apiKey={key}`);
+
+  // Ensure recordings directory exists
+  const recordingsDir = path.join(__dirname, '..', process.env.RECORDINGS_DIRECTORY || 'recordings');
+  if (!fs.existsSync(recordingsDir)) {
+    fs.mkdirSync(recordingsDir, { recursive: true });
+    console.log(`📁 Created recordings directory: ${recordingsDir}`);
+  }
+
+  // Handle WebSocket connections for voice communication
+  wss.on('connection', async (ws, request) => {
+    await websocketController.handleConnection(ws, request);
+  });
+
+  // Handle WebSocket server errors
+  wss.on('error', (error) => {
+    console.error('WebSocket server error:', error);
+  });
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('🛑 Received SIGTERM, shutting down gracefully');
+    server.close(() => {
+      console.log('💤 HTTP server closed');
+    });
+    wss.close(() => {
+      console.log('💤 WebSocket server closed');
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('🛑 Received SIGINT, shutting down gracefully');
+    server.close(() => {
+      console.log('💤 HTTP server closed');
+    });
+    wss.close(() => {
+      console.log('💤 WebSocket server closed');
+    });
   });
 }
 

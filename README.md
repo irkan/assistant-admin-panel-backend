@@ -1,6 +1,6 @@
 # Admin Panel Backend
 
-A modern Node.js/Express backend for admin panel applications with a health endpoint and best practices.
+A modern Node.js/Express backend for admin panel applications with health endpoint, voice communication WebSocket server, and best practices.
 
 ## Features
 
@@ -10,6 +10,10 @@ A modern Node.js/Express backend for admin panel applications with a health endp
 - ✅ Environment configuration
 - ✅ Error handling
 - ✅ Development and production ready
+- ✅ **Voice Communication WebSocket Server** (NEW)
+- ✅ **Real-time Gemini AI Voice Integration** (NEW)
+- ✅ **API Key Authentication for Voice** (NEW)
+- ✅ **Unified Backend Architecture** (NEW)
 
 ## Quick Start
 
@@ -42,6 +46,64 @@ npm run dev
 ```
 
 The server will start on `http://localhost:3000`
+
+## Voice Communication WebSocket
+
+The backend includes a WebSocket server for real-time voice communication with Gemini AI, running on the same port as the HTTP API for simplified deployment.
+
+### WebSocket Connection
+
+**Endpoint:** `ws://localhost:3003` (same port as HTTP API)
+
+**Required Parameters:**
+- `assistantUuid`: UUID of the assistant to communicate with
+- `apiKey`: Valid API key with permission to access the assistant
+
+**Example Connection:**
+```javascript
+const ws = new WebSocket('ws://localhost:3003?assistantUuid=c5a22c14-552d-43e3-8574-b014541d9957&apiKey=ak_1234567890abcdef');
+```
+
+### Voice Communication Flow
+
+1. **Connect**: Client connects with assistant UUID and API key
+2. **Validate**: Server validates API key and assistant access
+3. **Initialize**: Gemini session is created with assistant's configuration
+4. **Audio Stream**: Client sends audio data (PCM 16kHz) via WebSocket
+5. **Response**: Server streams back Gemini's audio responses
+
+### Message Types
+
+**Status Messages:**
+```json
+{"type": "status", "data": "Voice session opened"}
+```
+
+**Gemini Responses:**
+```json
+{"type": "gemini", "data": { /* Gemini response */ }}
+```
+
+**Error Messages:**
+```json
+{"type": "error", "data": "Error message"}
+```
+
+### Environment Variables
+
+Add these to your `.env` file:
+
+```env
+# Gemini Voice Configuration  
+GEMINI_MODEL=gemini-2.5-flash-preview-native-audio-dialog
+GEMINI_TEMPERATURE=1
+GEMINI_TRIGGER_TOKENS=25600
+GEMINI_TARGET_TOKENS=12800
+GEMINI_VOICE_NAME=Orus
+
+# Recordings Directory
+RECORDINGS_DIRECTORY=recordings
+```
 
 ## Database Setup with Prisma
 
