@@ -27,6 +27,8 @@ services:
       RECORDINGS_DIRECTORY: ${RECORDINGS_DIRECTORY}
     ports:
       - "3003:3000"
+    volumes:
+      - ./recordings:/app/recordings
     restart: unless-stopped
     networks:
       - app-network
